@@ -8,17 +8,17 @@ using System.Net.NetworkInformation;
 
 internal class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         //Task1
-        Thread tr1 = new Thread((sum => sum = Lesson2._arr1.Sum()));
-        Thread tr2 = new Thread((sum => sum = Lesson2._arr2.Sum()));
+        var Task1 = Lesson3.Task1();
+        var Task2 = Lesson3.Task2();
+        int num1 = Task1.Result;
+        int num2 = await Task2;
+        Console.WriteLine(num1 + num2);
 
-        tr1.Start();
-        tr2.Start();
-        tr1.Join(1000); tr2.Join(1000);
+        Console.WriteLine($"{num1} + {num2} = {num1+num2}");
 
-        Console.WriteLine($"{Lesson2._sum1} : {Lesson2._sum2} : {Lesson2._sum1 + Lesson2._sum2}");
 
         ////Task2
         //const string sait = "yandex.ru";
@@ -39,5 +39,7 @@ internal class Program
         //    tr.Start();
         //    tr.Join();
         //}
+
+        Lesson3.Task3();
     }
 }

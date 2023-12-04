@@ -23,7 +23,7 @@ namespace NetSharp
                 byte[] buffer = udpClient.Receive(ref iPEndPoint);
                 var messageText = Encoding.UTF8.GetString(buffer);
 
-                ThreadPool.QueueUserWorkItem(obj => {
+                Task.Run(()=> {
                     Message message = Message.DeserializeFromJson(messageText);
                     message.Print();
 

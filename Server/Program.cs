@@ -8,7 +8,8 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        UDPServer.Server();
+        var t = Task.Run(() => UDPServer.Server());
+        Task.WaitAll(t);
     }
-  
 }
+ 
