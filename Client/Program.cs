@@ -4,6 +4,11 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        UDPClient.SendMessage(args[0], args[1]);
+        for (int i = 0; i < 10; i++)
+        {
+            UDPClient.SendMessage("Li4e", i);
+        }
+        Console.ReadKey();
+
     }
 }
