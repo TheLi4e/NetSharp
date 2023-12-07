@@ -16,9 +16,10 @@ namespace NetSharp
             UdpClient udpClient = new UdpClient(12345);
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
-            Console.WriteLine("Сервер ждет сообщение от клиента");
+            Console.WriteLine("Сервер ждет сообщение от клиента.");
+            Console.WriteLine("Чтобы завершить работу сервера нажмите Enter.");
 
-            while (true)
+            while (Console.ReadKey().Key != ConsoleKey.Enter)
             {
                 byte[] buffer = udpClient.Receive(ref iPEndPoint);
                 var messageText = Encoding.UTF8.GetString(buffer);
@@ -32,6 +33,8 @@ namespace NetSharp
                     Console.WriteLine($"Отправлено {reply.Length}");
                 });
             }
+            Console.WriteLine("Сервер остановлен.");
+            Console.ReadLine();
         }
     }
 }
