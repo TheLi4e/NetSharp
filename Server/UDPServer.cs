@@ -11,28 +11,31 @@ namespace NetSharp
 {
     internal class UDPServer
     {
-        public static void Server()
+        public async Task Server()
         {
             UdpClient udpClient = new UdpClient(12345);
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            CancellationTokenSource cts = new CancellationTokenSource();
 
-            Console.WriteLine("Сервер ждет сообщение от клиента.");
-            Console.WriteLine("Чтобы завершить работу сервера нажмите Enter.");
+            Console.WriteLine("Сервер ждет сообщение от клиента...");
 
-            while (Console.ReadKey().Key != ConsoleKey.Enter)
+            while (!cts.IsCancellationRequested)
             {
                 byte[] buffer = udpClient.Receive(ref iPEndPoint);
-                var messageText = Encoding.UTF8.GetString(buffer);
 
-                Task.Run(()=> {
-                    Message message = Message.DeserializeFromJson(messageText);
-                    message.Print();
+                var messageTxt = Encoding.UTF8.GetString(buffer);
+                Console.WriteLine($"Получено {buffer.Length} байт");
 
-                    byte[] reply = Encoding.UTF8.GetBytes("Сообщение получено.");
-                    udpClient.Send(reply, reply.Length, iPEndPoint);
-                    Console.WriteLine($"Отправлено {reply.Length}");
-                });
+                byte[] reply = Encoding.UTF8.GetBytes("Сообщение получено");
+
+                int bytes = await udpClient.SendAsync(reply, iPEndPoint);
+                Console.WriteLine($"Отправлено {bytes} байт");
+
+                Message? message = Message.DeserializeFromJson(messageTxt);
+                if (message.Text.Equals("exit")) cts.Cancel();
+                message.Print();
             }
+
             Console.WriteLine("Сервер остановлен.");
             Console.ReadLine();
         }

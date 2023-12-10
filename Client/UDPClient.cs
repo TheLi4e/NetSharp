@@ -25,7 +25,7 @@ namespace Client
                 {
                     case "go":
                         Console.Write("Введите сообщение: ");
-                        string messageText = Console.ReadLine().ToLower();
+                        string messageText = Console.ReadLine();
 
                         Message message = new() { Text = messageText, DateTime = DateTime.Now, NickNameFrom = from, NickNameTo = "Server" };
                         string json = message.SerializeMessageToJson();
@@ -40,16 +40,16 @@ namespace Client
                         break;
                     case "exit":
                         run = false;
+                        Message exit = new() { Text = command, DateTime = DateTime.Now, NickNameFrom = from, NickNameTo = "Server" };
+                        string jsonEx = exit.SerializeMessageToJson();
+                        var data1 = Encoding.UTF8.GetBytes(jsonEx);
+                        udpClient.Send(data1, data1.Length, iPEndPoint);
                         Console.WriteLine("Чат завершает работу...");
                         break;
-                    default: 
+                    default:
                         Console.WriteLine("Неправильная команда. Попробуйте снова.");
                         break;
-
                 }
-
-                    
-                
             }
         }
     }
