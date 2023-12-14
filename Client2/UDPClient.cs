@@ -1,15 +1,15 @@
-﻿using NetSharp;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using System.Net.NetworkInformation;
+using NetSharp;
 
 namespace Client
 {
     internal class UDPClient
     {
         static UdpClient _udpClient = new UdpClient();
-        static IPEndPoint _iPEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12345);
+        static IPEndPoint _iPEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.2"), 12345);
         static string _from = RandomNameGenerator.GenerateRandomName();
         internal static void Reply()
         {
