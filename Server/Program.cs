@@ -8,7 +8,7 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        var server = new UDPServer();
-        server.Server();
+        var server = new Server();
+        server.Start();
     }
 }

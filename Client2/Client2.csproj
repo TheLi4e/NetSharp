@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NetSharp\NetSharp.csproj" />
     <ProjectReference Include="..\Server\Serv.csproj" />
   </ItemGroup>
 
