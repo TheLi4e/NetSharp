@@ -1,25 +1,21 @@
-﻿using NetChat2.Abstracts;
-using NetChat2.Models;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using ChatCommonLib.Abstractions;
+using ChatCommonLib.Models;
+using ChatDB;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NetChat2.Services
+
+namespace ChatAppLib
 {
-    public class Server
+    public class Server<T>
     {
-        Dictionary<string, IPEndPoint> clients = new Dictionary<string, IPEndPoint>();
-        private readonly IMessageSource _messageSouce;
-        private IPEndPoint ep;
-        public Server(IMessageSource messageSouce)
+        Dictionary<string, T> clients = [];
+        private readonly IMessageSourceServer<T> _messageSource;
+        private T ep;
+        public Server(IMessageSourceServer<T> messageSource)
         {
-            _messageSouce = messageSouce;
-            ep = new IPEndPoint(IPAddress.Any, 0);
+            _messageSource = messageSource;
+            ep = _messageSource.CreateEndpoint();
         }
 
         bool work = true;
@@ -32,7 +28,7 @@ namespace NetChat2.Services
         {
             Console.WriteLine($"Регистрирация нового пользователя = {message.NickNameFrom}");
 
-            if (clients.TryAdd(message.NickNameFrom, message.EndPoint))
+            if (clients.TryAdd(message.NickNameFrom, _messageSource.CopyEndpoint(message.EndPoint)))
             {
                 using (ChatContext context = new ChatContext())
                 {
@@ -41,9 +37,10 @@ namespace NetChat2.Services
                 }
             }
         }
+
         private async Task RelyMessage(NetMessage message)
         {
-            if (clients.TryGetValue(message.NickNameTo, out IPEndPoint ep))
+            if (clients.TryGetValue(message.NickNameTo, out T ep))
             {
                 int? id = 0;
                 using (var ctx = new ChatContext())
@@ -57,9 +54,12 @@ namespace NetChat2.Services
 
                     id = msg.MessageId;
                 }
+
                 message.Id = id;
-                await _messageSouce.SendAsync(message, ep);
-                Console.WriteLine($"Сообщение переслано от = {message.NickNameFrom} к = {message.NickNameTo}");
+
+                await _messageSource.SendAsync(message, ep);
+
+                Console.WriteLine($"Сообщение переслано от = {message.NickNameFrom} to = {message.NickNameTo}");
             }
             else
             {
@@ -67,7 +67,7 @@ namespace NetChat2.Services
             }
         }
 
-        async Task ConfirmMessageReceived(int? id)
+        static async Task ConfirmMessageReceived(int? id)
         {
             Console.WriteLine("Сообщение получено, id = " + id);
 
@@ -89,19 +89,20 @@ namespace NetChat2.Services
             {
                 case Command.Register: await Register(message); break;
                 case Command.Message: await RelyMessage(message); break;
-                case Command.Confirmation: await ConfirmMessageReceived(message.Id); break;
+                case Command.Confirmation: await Server<T>.ConfirmMessageReceived(message.Id); break;
             }
         }
 
         public async Task Start()
         {
+
             Console.WriteLine("Сервер ожидает сообщения ");
 
             while (work)
             {
                 try
                 {
-                    var message = _messageSouce.Receive(ref ep);
+                    var message = _messageSource.Receive(ref ep);
                     Console.WriteLine(message.ToString());
                     await ProcessMessage(message);
 
@@ -112,6 +113,9 @@ namespace NetChat2.Services
                 }
 
             }
+
+
         }
+
     }
 }
